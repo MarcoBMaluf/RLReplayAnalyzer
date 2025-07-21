@@ -1,0 +1,7 @@
+COMMAND LINE INPUT FOR rrrocket:
+
+To get a replay into a .json:
+
+`
+./rrrocket --multiple --network-parse --pretty -- --output /output/path replay.replay
+`
