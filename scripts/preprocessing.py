@@ -132,11 +132,14 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 1:
+    (Separate relevant ball data into its own dataframe (will be the principle dataframe post-separation)
     '''
     ball_data = df[['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z']].copy(deep=True)
 
     '''
     Step 2:
+    (Using the new principle dataframe, for each time-step compute the 3D distance of the ball 
+    to the center of the goal and the angle of the ball between the goal-posts)
     '''
     final_value = []
     for i in range(64, ball_data.shape[0]+1, 64):
@@ -163,6 +166,8 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 3:
+    (Using the new angle variable, use the player positions of the defending team 
+    to determine (at each time-step) how many of them are betweeen the ball and the goal)
     '''
     player_positions_indeces = [10,11,12,25, 27,28,29,42, 44,45,46,59, 61,62,63,76, 78,79,80,93, 95,96,97,110]
     player_segments = [df.iloc[i:i+64, player_positions_indeces].copy(deep=True) for i in range(0, df.shape[0], 64)]
@@ -197,6 +202,7 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 4:
+    (Find the number of players within 400 units of the ball at each time-step)
     '''
     col_indeces = [26, 43, 60, 77, 94, 111]
     dist_to_ball = df.iloc[:, col_indeces].copy(deep=False)
@@ -211,6 +217,7 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 5:
+    (Implement a Spectral Embedding on the attacking and defending teams, respectively, to get a team-state variable)
     '''
     # getting ball and players positions
     num_players = find_player_count(df)
@@ -253,6 +260,9 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 6:
+    (Once all the new features are created, reformat the ball data (absolute value of the `y` direction), 
+    fill in NA values, and standardize/scale the features appropriately for use with a model. 
+    Add the label into the final dataset)
     '''
     standardize_cols = ['pos_x','pos_y','pos_z','vel_x','vel_y','vel_z']
     scale_cols = ['dist_to_goal','angle_to_goal','players_btwn_ball_and_goal','players_within_400_of_ball']
@@ -270,6 +280,7 @@ for i, csv in enumerate(raw_csvs):
 
     '''
     Step 7
+    (Turn the dataframes into separate torch tensors, merge into a torch dataset, and save the dataset)
     '''
     SEQ_LENGTH = 64
     NUM_SEQS = int(ball_data.shape[0]/64)
